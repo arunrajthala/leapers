@@ -152,15 +152,11 @@ class PDODatabase
 	public function update($id, $arr_filedvalues)
 	{
 		$this->getByID($id);
-		//var_dump($arr_filedvalues);
+		var_dump($arr_filedvalues, $this->updateFields);
 		//die();
 		//var_dump($_POST);
 		foreach ($this->updateFields as $_field) {
-			//var_dump($arr_filedvalues);die();
-
-			$f = "0";
 			if (isset($arr_filedvalues[$_field])) {
-
 				$f = $arr_filedvalues[$_field];
 				if (isset($arr_filedvalues[$_field])) {
 					//var_dump($arr_filedvalues);die();
@@ -171,12 +167,9 @@ class PDODatabase
 					} else {
 						$f = $arr_filedvalues[$_field];
 					}
+					$this->setFieldValues($_field, str_replace("'", "\\'", $f));
 				}
-			} else {
-
-				//echo $_field;
 			}
-			$this->setFieldValues($_field, str_replace("'", "\\'", $f));
 		}
 		//var_dump($this->field_values);die();
 		//var_dump($this->field_values);
@@ -360,7 +353,6 @@ class PDODatabase
 		$fieldNames = implode('`, `', array_keys($this->fieldValues));
 		$fieldValues = implode("', '", array_values($this->fieldValues));
 		$strSQL = "INSERT INTO $this->tbl (`$fieldNames`) VALUES ('$fieldValues')";
-		//echo $strSQL;die();
 		$statement = $this->db->prepare($strSQL);
 		$objRes = $this->db->query($strSQL);
 		$this->id = $this->db->lastInsertId($this->prefix . 'uin');
@@ -394,6 +386,7 @@ class PDODatabase
 	 */
 	public function insert($arr_filedvalues)
 	{
+
 		$id = 0;
 		foreach ($this->updateFields as $_field) {
 			$f = 0;
