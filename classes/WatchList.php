@@ -71,6 +71,7 @@ class WatchList extends PDODatabase
 		$arr['updatedBy'] = $user['us01uin'];
 		$arr['updatedOn'] = date('Y-m-d H:i:s');
 		//var_dump('arr',$arr);
+		//database independent cases
 		return parent::update($id, $arr);
 		//$this->update_core($id);
 	}
