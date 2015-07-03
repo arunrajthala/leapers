@@ -1,0 +1,16 @@
+Options +FollowSymlinks
+RewriteEngine on
+Options -Indexes
+ErrorDocument 404 /index.php?module=Pages&Page=404
+RewriteCond %{SCRIPT_FILENAME} !-d
+RewriteCond %{SCRIPT_FILENAME} !-f
+#for pages.................
+RewriteRule ^Page/([a-zA-Z]+)/([0-9]+)/([0-9]+)/(.*)$ index.php?module=Pages&page=$1&_Id=$2&_Id1=$3 [L]
+RewriteRule ^Page/([a-zA-Z]+)/([0-9]+)/(.*)$ index.php?module=Pages&page=$1&_Id=$2 [L]
+RewriteRule ^Page/([a-zA-Z]+)/$ index.php?module=Pages&page=$1 [L]
+
+
+
+
+
+

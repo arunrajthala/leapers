@@ -1,0 +1,39 @@
+/* thumbnails list simple styles */
+ul.thumb-list {
+	list-style: none;
+	overflow: hidden;
+
+	padding: 0;
+	margin: 10px 0px;
+	
+}
+ul.thumb-list li {
+	margin: 0 10px 0 0;
+	display: inline;
+	float: left;
+}
+ul.thumb-list a {
+	border: 1px solid #ccc;
+	padding: 4px;
+	float: left;
+}
+ul.thumb-list img {
+	vertical-align: top;
+	width: 150px;
+}
+/* example popup styles */
+.popup-holder {
+	position: relative;
+	overflow: hidden;
+	height: 0;
+}
+.lightbox {
+	padding: 5px;
+	width: 300px;
+}
+.lightbox h2 {
+	margin: 0 0 10px;
+}
+.lightbox p {
+	margin: 0;
+}
