@@ -46,6 +46,21 @@
 <div class="clearfix">
 <script>
     var myJsonString = (JSON.stringify(<?php echo json_encode($data); ?>));
+
+//    var arr = myJsonString.split('}');
+//    var arr2 = arr[0].split(',');
+//    console.log(arr2[0]);
+
+//    var arr = JSON.parse(myJsonString);
+
+//    for (var key in arr) {
+//        for (var k in arr[key]) {
+//            console.log(key.k);
+//        }
+//        console.log(arr[key].log02uin);
+//    }
+//    console.log(Object.value(arr));
+
     var url;
     var data;
     url = "ajax/ListLog.php";
@@ -53,7 +68,10 @@
     $( document ).ready(function() {
         $('#table-content').dataTable();
 
-        $('.reload').on('click', function(e) {
+        $('.reload').trigger('click');
+
+//        $('.reload').on('click', function(e) {
+        setInterval( function () {
             $.ajax({
                 url: url,
                 type: 'get',
@@ -64,16 +82,13 @@
                         } else {
                             console.log('Log not changed.');
                         }
-
                 },
                 error: function(xhr, desc, err) {
                     console.log(xhr);
                     console.log("Details: " + desc + "\nError:" + err);
                 }
             });
-        });
-
-
+        }, 5000);
     });
 
     (function () {
@@ -106,4 +121,11 @@
         };
 
     }());
+
+//    window.setTimeout('location.reload()', 5000);
+//    var container = $("#table-content");
+//    container.load("<?php //?>//");
+//    var refreshId = setInterval(function(){
+//        $
+//    })
 </script>
