@@ -11,7 +11,7 @@ define('ADMIN_FOLDER', 'admin-control');
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'db_hacker');
 define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_PASS', 'toor');
 
 require_once('database.php');
 require_once('functions.php');
