@@ -10,15 +10,15 @@ class WatchList extends PDODatabase
 	private $current_right;
 	private $current_user;
 	private $tbl = 'watchlist';
-	//SELECT  `uin`,  `title`,  LEFT(`detail`, 256),  `shortDesc`,  `address`,  `phone`,  `url`,  `file`,  `cat01uin` FROM `poor`.`posts` LIMIT 1000;
+//SELECT  `uin`,  `title`,  LEFT(`detail`, 256),  `shortDesc`,  `address`,  `phone`,  `url`,  `file`,  `cat01uin` FROM `poor`.`posts` LIMIT 1000;
 	private $list_fields = array('UIN' => 'uin', 'Table' => 'table');
 	private $upload_fields = array();
-	//private $uploadUrl=  'newstype/';
+//private $uploadUrl=  'newstype/';
 
 	private $fields = array('uin', 'table', 'create', 'update', 'alter', 'delete', 'truncate', 'updatedBy', 'updatedOn');
 	private $_uploadUrl = '';
-	//private $field_values=array();
-	//private $fields_update=array('title','detail','shortDesc','date','news01uin');
+//private $field_values=array();
+//private $fields_update=array('title','detail','shortDesc','date','news01uin');
 	private $update_fields = array('table', 'create', 'update', 'alter', 'delete', 'truncate');
 	private $file_fields = array('');
 
@@ -64,13 +64,37 @@ class WatchList extends PDODatabase
 
 	public function update($id, $arr)
 	{
-		//var_dump($_SESSION);
-		//$objUser= new Users();
-		global $objUser;
+//var_dump($_SESSION);
+//$objUser= new Users();
+		global $objUser, $objDb;
+
 		$user = $objUser->getCurrentUser();
+		$row = $this->getByID($arr['uin']);
+
+		$qryFields = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" . DB_NAME . "' AND TABLE_NAME = '" . $row['log01table'] . "'";
+
+		$targeFields = $this->Query($qryFields);
+		var_dump($targeFields);
 		$arr['updatedBy'] = $user['us01uin'];
 		$arr['updatedOn'] = date('Y-m-d H:i:s');
-		//var_dump('arr',$arr);
+		$sqlTrigger = "CREATE TRIGGER `trig_update_test_add` AFTER UPDATE on `" . $row['log01table'] . "`
+			FOR EACH ROW
+			BEGIN
+				DECLARE before_column_values varchar(255) DEFAULT '';
+				DECLARE after_column_values varchar(255) DEFAULT ''; ";
+		foreach ($targeFields as $field) {
+			$sqlTrigger.="IF (NEW." . $field['COLUMN_NAME'] . " != OLD." . $field['COLUMN_NAME'] . ") THEN
+before_column_values = concatenate(before_column_values, columnx, '=', OLD." . $field['COLUMN_NAME'] . ", '|');
+after_column_values = concatenate(after_column_values, columnx, '=', NEW." . $field['COLUMN_NAME'] . ", '|');
+END IF;";
+		}
+
+		$sqlTrigger.="INSERT INTO log02log(log02tablename, log02action, log02before, log02after)
+VALUES
+('xxx', 'yyy', before_column_values, after_column_values);
+END";
+		var_dump($sqlTrigger);
+		die();
 		//database independent cases
 		return parent::update($id, $arr);
 		//$this->update_core($id);
