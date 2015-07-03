@@ -70,7 +70,15 @@ class WatchList extends PDODatabase
 		$user = $objUser->getCurrentUser();
 		$arr['updatedBy'] = $user['us01uin'];
 		$arr['updatedOn'] = date('Y-m-d H:i:s');
+
+//        var_dump(parent::update($id, $arr)); exit();
+
 		//var_dump('arr',$arr);
+//		$status = parent::update($id, $arr);
+
+//        if ($status !== false) {
+//            $sql = "CREATE TRIGGER " . "MysqlTrigger " . " BEFORE " . " UPDATE " . " ON " . " have_fun FOR EACH ROW SET NEW.title=UPPER(NEW.title);";
+//        }
 		return parent::update($id, $arr);
 		//$this->update_core($id);
 	}
