@@ -345,6 +345,11 @@ class PDODatabase
 		return $this->MySQL_to_Array($objRes);
 	}
 
+	public function Query($sql)
+	{
+		return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+	}
+
 	/**
 	 * insert
 	 * @param string $table A name of table to insert into

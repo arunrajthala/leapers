@@ -1,10 +1,8 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+$objDb = new PDODatabase();
+$tables = $objDb->Query('SHOW TABLES FROM ' . DB_NAME);
+$data['module_Title'] = 'List of tables';
+$data['tableList'] = $tables;
 
-$data['data'] = 'this is my data';
 echo defaultAdminModule($strModuleName, $data);
