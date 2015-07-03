@@ -24,6 +24,8 @@
 		<link href="css/fonts/fonts.css" rel="stylesheet">
 		<link href="css/themes/webticker.css" rel="stylesheet">
 		<link href='http://fonts.googleapis.com/css?family=Roboto:400,300,700,500' rel='stylesheet' type='text/css'>
+        <link href="<?php echo BASE_URL; ?>css/admin/dataTables.css" rel="stylesheet" type="text/css" />
+
 		<!--
 
 		<link href="css/themes/reset.css" rel="stylesheet">
@@ -35,9 +37,8 @@
 		<script src="js/themes/jquery.min.js"></script>
 		<script src="js/themes/jquery.modern-ticker.min.js"></script>
 		<script src="js/themes/bootstrap.min.js"></script>
-
+        <script src="<?php echo BASE_URL; ?>js/admin/dataTables.js"></script>
 		<link href='http://fonts.googleapis.com/css?family=Monda' rel='stylesheet' type='text/css'>
-
 	</head>
 
 	<body>
