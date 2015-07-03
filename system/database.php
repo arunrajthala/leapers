@@ -152,8 +152,6 @@ class PDODatabase
 	public function update($id, $arr_filedvalues)
 	{
 		$this->getByID($id);
-		var_dump($arr_filedvalues, $this->updateFields);
-		//die();
 		//var_dump($_POST);
 		foreach ($this->updateFields as $_field) {
 			if (isset($arr_filedvalues[$_field])) {
@@ -189,13 +187,9 @@ class PDODatabase
 		$fieldDetails = NULL;
 
 		$fieldDetails = $this->buildUpdateString($this->fieldValues);
-		//var_dump($fieldDetails);
 		$strSQL = "UPDATE $this->tbl SET $fieldDetails WHERE $this->idField=$this->id";
-		//echo $strSQL;die();
-		//die();mysql_error
 		$statement = $this->db->prepare($strSQL);
 		$objRes = $this->db->query($strSQL);
-		//var_dump($objRes);die();
 		return $objRes;
 		/*
 		  foreach ($data as $key => $value) {
