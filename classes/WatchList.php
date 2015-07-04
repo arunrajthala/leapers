@@ -77,27 +77,43 @@ class WatchList extends PDODatabase
 		var_dump($targeFields);
 		$arr['updatedBy'] = $user['us01uin'];
 		$arr['updatedOn'] = date('Y-m-d H:i:s');
-		$sqlTrigger = "CREATE TRIGGER `trig_update_test_add` AFTER UPDATE on `" . $row['log01table'] . "`
-			FOR EACH ROW
-			BEGIN
-				DECLARE before_column_values varchar(255) DEFAULT '';
-				DECLARE after_column_values varchar(255) DEFAULT ''; ";
+		$sqlTrigger = "CREATE TRIGGER  `trigger" . date('Y-m-d H:i:s') . "` AFTER INSERT ON `" . $row['log01table'] . "`
+FOR EACH ROW
+BEGIN ";
 		foreach ($targeFields as $field) {
-			$sqlTrigger.="IF (NEW." . $field['COLUMN_NAME'] . " != OLD." . $field['COLUMN_NAME'] . ") THEN
-before_column_values = concatenate(before_column_values, columnx, '=', OLD." . $field['COLUMN_NAME'] . ", '|');
-after_column_values = concatenate(after_column_values, columnx, '=', NEW." . $field['COLUMN_NAME'] . ", '|');
-END IF;";
-		}
 
-		$sqlTrigger.="INSERT INTO log02log(log02tablename, log02action, log02before, log02after)
-VALUES
-('xxx', 'yyy', before_column_values, after_column_values);
-END";
-		var_dump($sqlTrigger);
-		die();
-		//database independent cases
+			$sqlTrigger .= "IF( NEW." . $field['COLUMN_NAME'] . " ) THEN
+INSERT INTO log02log( `log02action` , `log02tablename` , `log02before` , `log02after` ) VALUES ( 'insert', 'TESTCHAR', '', NEW." . $field['COLUMN_NAME'] . " );END IF ;";
+		}
+		$sqlTrigger .= "END;";
+//		$sqlTrigger = "DELIMITER $$ CREATE TRIGGER `trig_update_test_add` AFTER UPDATE on `" . $row['log01table'] . "`FOR EACH ROW BEGIN ";
+//		$sqlTrigger = " DELIMITER $$ CREATE TRIGGER `trig_update_test_add` AFTER UPDATE on `" . $row['log01table'] . "`
+//FOR EACH ROW
+//BEGIN
+//	DECLARE before_column_values varchar(255) DEFAULT '';
+//    DECLARE after_column_values varchar(255) DEFAULT '';";
+//		foreach ($targeFields as $field) {
+//			$sqlTrigger.=" IF (NEW." . $field['COLUMN_NAME'] . " != OLD." . $field['COLUMN_NAME'] . ") THEN
+//before_column_values = concat(before_column_values, '" . $field['COLUMN_NAME'] . "', '=', OLD." . $field['COLUMN_NAME'] . ", '|');
+//after_column_values = concat(after_column_values, '" . $field['COLUMN_NAME'] . "', '=', NEW." . $field['COLUMN_NAME'] . ", '|');
+//";
+//			$sqlTrigger.="INSERT INTO log02log(log02tablename, log02action, log02before, log02after) VALUES ('xxx', 'yyy', before_column_values, after_column_values); END IF;";
+//		}
+//
+//		$sqlTrigger.="INSERT INTO log02log(log02tablename, log02action, log02before, log02after)
+//VALUES
+//('xxx', 'yyy', before_column_values, after_column_values);
+//END $$";
+
+
+
+
+		$this->Query($sqlTrigger);
+		//var_dump($sqlTrigger);
+		//die();
+//database independent cases
 		return parent::update($id, $arr);
-		//$this->update_core($id);
+//$this->update_core($id);
 	}
 
 	public function validate($type)
@@ -114,7 +130,7 @@ END";
 	public function getByTableName($tableName, $page = 1, $per = 1000)
 	{
 		$data = $this->get(array('table' => $tableName), '', $per, $page);
-		//var_dump($data);
+//var_dump($data);
 		return $data;
 	}
 
