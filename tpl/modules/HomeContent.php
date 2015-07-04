@@ -16,7 +16,7 @@
             <th>Modified On</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody id="table-body">
     <?php foreach ($data as $value) :?>
         <tr>
         <?php foreach ($value as $v) :?>
@@ -50,10 +50,6 @@
     url = "ajax/ListLog.php";
 
     $( document ).ready(function() {
-        $('#table-content').dataTable();
-
-        $('.reload').trigger('click');
-
         setInterval( function () {
             $.ajax({
                 url: url,
@@ -62,7 +58,7 @@
                         if(myJsonString != data) {
                             console.log('Log changed.');
                             flashTitle("Table changed in database.");
-
+                            $('#table-content').html(loadTable(data));
                             compareObjects(myJsonString, data);
 
                         } else {
@@ -106,6 +102,26 @@
             document.title = original;
         };
     }());
+
+    function loadTable(data)
+    {
+        var obj = JSON.parse(data);
+        var table = '';
+
+        table += "<table id='table-content' class='display' cellspacing='0' width='100%'>";
+        table += "<thead><tr><th>Uin</th><th>Tablename</th><th>Action</th><th>Value Before</th><th>Value After</th><th>Modified By</th><th>Modified On</th></tr></thead><tbody id='table-body'>";
+
+        $.each(obj, function(k, v) {
+            table += "<tr>";
+
+            $.each(v, function (kk, vv){
+                table += "<td>" + vv + "</td>";
+            });
+            table += "</tr>";
+        });
+        table += "</tbody></table>";
+        return table;
+    }
 
     function compareObjects(myJsonString, data)
     {
