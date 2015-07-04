@@ -4,7 +4,7 @@
     $data = $obj->get();
     ?>
 
-    <table id="table-content" class="display" cellspacing="0" width="100%">
+    <table id="table-content" class="display table-bordered table-hover table-striped" cellspacing="0" width="100%">
         <thead>
         <tr>
             <th>Uin</th>
@@ -16,7 +16,7 @@
             <th>Modified On</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody id="table-body">
     <?php foreach ($data as $value) :?>
         <tr>
         <?php foreach ($value as $v) :?>
@@ -28,52 +28,35 @@
         </tr>
     <?php endforeach ?>
         </tbody>
-        <tfoot>
-        <tr>
-            <th>Uin</th>
-            <th>Tablename</th>
-            <th>Action</th>
-            <th>Value Before</th>
-            <th>Value After</th>
-            <th>Modified By</th>
-            <th>Modified On</th>
-        </tr>
-        </tfoot>
     </table>
-
-    <button class="reload">Reload</button>
 </div>
 <div class="clearfix">
 <script>
     var myJsonString = (JSON.stringify(<?php echo json_encode($data); ?>));
+    var flag = 0;
     var url;
     var data;
     url = "ajax/ListLog.php";
 
     $( document ).ready(function() {
-        $('#table-content').dataTable();
-
-        $('.reload').on('click', function(e) {
+        setInterval( function () {
             $.ajax({
                 url: url,
                 type: 'get',
                 success: function(data) {
                         if(myJsonString != data) {
-                            console.log('Log changed.');
-                            flashTitle("Table changed in database.");
-                        } else {
-                            console.log('Log not changed.');
+                            console.log('Log updated.');
+                            flashTitle("Database Table changed.");
+                            $('#table-content').html(loadTable(data));
+                            compareObjects(myJsonString, data);
                         }
-
                 },
                 error: function(xhr, desc, err) {
                     console.log(xhr);
                     console.log("Details: " + desc + "\nError:" + err);
                 }
             });
-        });
-
-
+        }, 5000);
     });
 
     (function () {
@@ -104,6 +87,87 @@
             clearTimeout(timeout);
             document.title = original;
         };
-
     }());
+
+    function loadTable(data)
+    {
+        var obj = JSON.parse(data);
+        var table = '';
+
+        table += "<table id='table-content' class='display table-bordered table-hover table-striped' cellspacing='0' width='100%'>";
+        table += "<thead><tr><th>Uin</th><th>Tablename</th><th>Action</th><th>Value Before</th><th>Value After</th><th>Modified By</th><th>Modified On</th></tr></thead><tbody id='table-body'>";
+
+        $.each(obj, function(k, v) {
+            table += "<tr>";
+
+            $.each(v, function (kk, vv){
+                table += "<td>" + vv + "</td>";
+            });
+            table += "</tr>";
+        });
+        table += "</tbody></table>";
+        return table;
+    }
+
+    function compareObjects(myJsonString, data)
+    {
+        var formDataObj = JSON.parse(myJsonString);
+        var dbDataObj = JSON.parse(data);
+
+        var a = [];
+        var b = [];
+
+        for (var key in formDataObj) {
+            if (formDataObj.hasOwnProperty(key)) {
+                var obj = formDataObj[key];
+
+                for (var prop in obj) {
+                    if(obj.hasOwnProperty(prop)){
+                        a.push(key + "," + prop + "," + obj[prop]);
+                    }
+                }
+            }
+        }
+
+        for (var key in dbDataObj) {
+            if (dbDataObj.hasOwnProperty(key)) {
+                var obj = dbDataObj[key];
+
+                for (var prop in obj) {
+                    if(obj.hasOwnProperty(prop)){
+                        var tmp = key + "," + prop + "," + obj[prop];
+                        b.push(tmp);
+                    }
+                }
+            }
+        }
+
+        var alertMsg = '';
+        for (var i = 0; i < a.length; i++) {
+            if (a[i] != b[i]) {
+                var formSplitString = a[i].split(",");
+                var dbSplitString = b[i].split(",");
+                alertMsg += ("Changed Column is \'" + formSplitString[1] + "\', before data \'" + formSplitString[2] + "\', after data is \'" + dbSplitString[2] + "\'.");
+                alertMsg += "<br>";
+            }
+        }
+        console.log(alertMsg);
+        if (flag == 0)
+            alertify.alert(alertMsg);
+        flag = 1;
+    }
+
+    function reset () {
+        $("#toggleCSS").attr("href", "../../css/themes/alertify.default.css");
+        alertify.set({
+            labels : {
+                ok     : "OK",
+                cancel : "Cancel"
+            },
+            delay : 5000,
+            buttonReverse : false,
+            buttonFocus   : "ok"
+        });
+    }
 </script>
+<script src="../../js/alertify.min.js"></script>
