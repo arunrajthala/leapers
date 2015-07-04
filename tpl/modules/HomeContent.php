@@ -4,7 +4,7 @@
     $data = $obj->get();
     ?>
 
-    <table id="table-content" class="display" cellspacing="0" width="100%">
+    <table id="table-content" class="display table-bordered table-hover table-striped" cellspacing="0" width="100%">
         <thead>
         <tr>
             <th>Uin</th>
@@ -28,23 +28,12 @@
         </tr>
     <?php endforeach ?>
         </tbody>
-        <tfoot>
-        <tr>
-            <th>Uin</th>
-            <th>Tablename</th>
-            <th>Action</th>
-            <th>Value Before</th>
-            <th>Value After</th>
-            <th>Modified By</th>
-            <th>Modified On</th>
-        </tr>
-        </tfoot>
     </table>
 </div>
 <div class="clearfix">
 <script>
     var myJsonString = (JSON.stringify(<?php echo json_encode($data); ?>));
-
+    var flag = 0;
     var url;
     var data;
     url = "ajax/ListLog.php";
@@ -56,13 +45,10 @@
                 type: 'get',
                 success: function(data) {
                         if(myJsonString != data) {
-                            console.log('Log changed.');
-                            flashTitle("Table changed in database.");
+                            console.log('Log updated.');
+                            flashTitle("Database Table changed.");
                             $('#table-content').html(loadTable(data));
                             compareObjects(myJsonString, data);
-
-                        } else {
-                            console.log('Log not changed.');
                         }
                 },
                 error: function(xhr, desc, err) {
@@ -108,7 +94,7 @@
         var obj = JSON.parse(data);
         var table = '';
 
-        table += "<table id='table-content' class='display' cellspacing='0' width='100%'>";
+        table += "<table id='table-content' class='display table-bordered table-hover table-striped' cellspacing='0' width='100%'>";
         table += "<thead><tr><th>Uin</th><th>Tablename</th><th>Action</th><th>Value Before</th><th>Value After</th><th>Modified By</th><th>Modified On</th></tr></thead><tbody id='table-body'>";
 
         $.each(obj, function(k, v) {
@@ -156,14 +142,32 @@
             }
         }
 
+        var alertMsg = '';
         for (var i = 0; i < a.length; i++) {
             if (a[i] != b[i]) {
                 var formSplitString = a[i].split(",");
                 var dbSplitString = b[i].split(",");
-                console.log("Changed Column is \'" + formSplitString[1] + "\', before data \'" + formSplitString[2] + "\', after data is \'" + dbSplitString[2] + "\'.");
-            } else {
-                console.log('same data');
+                alertMsg += ("Changed Column is \'" + formSplitString[1] + "\', before data \'" + formSplitString[2] + "\', after data is \'" + dbSplitString[2] + "\'.");
+                alertMsg += "<br>";
             }
         }
+        console.log(alertMsg);
+        if (flag == 0)
+            alertify.alert(alertMsg);
+        flag = 1;
+    }
+
+    function reset () {
+        $("#toggleCSS").attr("href", "../../css/themes/alertify.default.css");
+        alertify.set({
+            labels : {
+                ok     : "OK",
+                cancel : "Cancel"
+            },
+            delay : 5000,
+            buttonReverse : false,
+            buttonFocus   : "ok"
+        });
     }
 </script>
+<script src="../../js/alertify.min.js"></script>

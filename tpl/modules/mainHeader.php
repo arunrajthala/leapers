@@ -1,4 +1,7 @@
 <header>
+    <link rel="stylesheet" href="../../css/themes/alertify.core.css" />
+    <link rel="stylesheet" href="../../css/themes/alertify.default.css" id="toggleCSS" />
+
 	<div class="container">
 		<div class="row">
 			<div class="col-md-9">
