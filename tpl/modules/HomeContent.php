@@ -40,26 +40,10 @@
         </tr>
         </tfoot>
     </table>
-
-    <button class="reload">Reload</button>
 </div>
 <div class="clearfix">
 <script>
     var myJsonString = (JSON.stringify(<?php echo json_encode($data); ?>));
-
-//    var arr = myJsonString.split('}');
-//    var arr2 = arr[0].split(',');
-//    console.log(arr2[0]);
-
-//    var arr = JSON.parse(myJsonString);
-
-//    for (var key in arr) {
-//        for (var k in arr[key]) {
-//            console.log(key.k);
-//        }
-//        console.log(arr[key].log02uin);
-//    }
-//    console.log(Object.value(arr));
 
     var url;
     var data;
@@ -70,7 +54,6 @@
 
         $('.reload').trigger('click');
 
-//        $('.reload').on('click', function(e) {
         setInterval( function () {
             $.ajax({
                 url: url,
@@ -79,6 +62,9 @@
                         if(myJsonString != data) {
                             console.log('Log changed.');
                             flashTitle("Table changed in database.");
+
+                            compareObjects(myJsonString, data);
+
                         } else {
                             console.log('Log not changed.');
                         }
@@ -119,13 +105,49 @@
             clearTimeout(timeout);
             document.title = original;
         };
-
     }());
 
-//    window.setTimeout('location.reload()', 5000);
-//    var container = $("#table-content");
-//    container.load("<?php //?>//");
-//    var refreshId = setInterval(function(){
-//        $
-//    })
+    function compareObjects(myJsonString, data)
+    {
+        var formDataObj = JSON.parse(myJsonString);
+        var dbDataObj = JSON.parse(data);
+
+        var a = [];
+        var b = [];
+
+        for (var key in formDataObj) {
+            if (formDataObj.hasOwnProperty(key)) {
+                var obj = formDataObj[key];
+
+                for (var prop in obj) {
+                    if(obj.hasOwnProperty(prop)){
+                        a.push(key + "," + prop + "," + obj[prop]);
+                    }
+                }
+            }
+        }
+
+        for (var key in dbDataObj) {
+            if (dbDataObj.hasOwnProperty(key)) {
+                var obj = dbDataObj[key];
+
+                for (var prop in obj) {
+                    if(obj.hasOwnProperty(prop)){
+                        var tmp = key + "," + prop + "," + obj[prop];
+                        b.push(tmp);
+                    }
+                }
+            }
+        }
+
+        for (var i = 0; i < a.length; i++) {
+            if (a[i] != b[i]) {
+                var formSplitString = a[i].split(",");
+                var dbSplitString = b[i].split(",");
+                console.log("Changed Column is \'" + formSplitString[1] + "\', before data \'" + formSplitString[2] + "\', after data is \'" + dbSplitString[2] + "\'.");
+            } else {
+                console.log('same data');
+            }
+        }
+    }
 </script>
