@@ -15,11 +15,11 @@ class WatchList extends PDODatabase
 	private $upload_fields = array();
 //private $uploadUrl=  'newstype/';
 
-	private $fields = array('uin', 'table', 'create', 'update', 'alter', 'delete', 'truncate', 'updatedBy', 'updatedOn');
+	private $fields = array('uin', 'table', 'create', 'update', 'delete', 'updatedBy', 'updatedOn');
 	private $_uploadUrl = '';
 //private $field_values=array();
 //private $fields_update=array('title','detail','shortDesc','date','news01uin');
-	private $update_fields = array('table', 'create', 'update', 'alter', 'delete', 'truncate');
+	private $update_fields = array('table', 'create', 'update', 'delete');
 	private $file_fields = array('');
 
 	/**
@@ -71,49 +71,133 @@ class WatchList extends PDODatabase
 		$user = $objUser->getCurrentUser();
 		$row = $this->getByID($arr['uin']);
 
-		$qryFields = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" . DB_NAME . "' AND TABLE_NAME = '" . $row['log01table'] . "'";
+		if ($arr['create']) {
 
-		$targeFields = $this->Query($qryFields);
-		var_dump($targeFields);
-		$arr['updatedBy'] = $user['us01uin'];
-		$arr['updatedOn'] = date('Y-m-d H:i:s');
-		$sqlTrigger = "CREATE TRIGGER  `trigger" . date('Y-m-d H:i:s') . "` AFTER INSERT ON `" . $row['log01table'] . "`
+			$action = 'INSERT';
+			$qryFields = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" . DB_NAME . "' AND TABLE_NAME = '" . $row['log01table'] . "'";
+
+			$targeFields = $this->Query($qryFields);
+			$qryCheck = "select trigger_name from information_schema.triggers where event_object_table='" . $row['log01table'] . "';";
+			$triggerList = $this->Query($qryCheck);
+
+			if (!$triggerList) {
+				$sqlTrigger = "CREATE TRIGGER  `trigger" . date('Y-m-d H:i:s') . "` AFTER " . $action . " ON `" . $row['log01table'] . "`
 FOR EACH ROW
 BEGIN ";
-		foreach ($targeFields as $field) {
+				foreach ($targeFields as $field) {
 
-			$sqlTrigger .= "IF( NEW." . $field['COLUMN_NAME'] . " ) THEN
-INSERT INTO log02log( `log02action` , `log02tablename` , `log02before` , `log02after` ) VALUES ( 'insert', 'TESTCHAR', '', NEW." . $field['COLUMN_NAME'] . " );END IF ;";
+					$sqlTrigger .= "IF( NEW." . $field['COLUMN_NAME'] . " ) THEN
+INSERT INTO log02log( `log02action` , `log02tablename` ,`log02field` , `log02before` , `log02after` ) VALUES ( 'insert', '" . $row['log01table'] . "', '" . $field['COLUMN_NAME'] . "', NEW." . $field['COLUMN_NAME'] . " );END IF ;";
+				}
+				$sqlTrigger .= "END;";
+				$this->Query($sqlTrigger);
+			}
+			foreach ($triggerList as $trigger) {
+				$triggerName = $trigger['trigger_name'];
+				$sqlTriggerType = "select TRIGGER_NAME from information_schema.triggers where event_object_table='" . $row['log01table'] . "' and event_manipulation in('" . $action . "');";
+				$triggerType = $this->Query($sqlTriggerType);
+				if (!$triggerType) {
+
+					$arr['updatedBy'] = $user['us01uin'];
+					$arr['updatedOn'] = date('Y-m-d H:i:s');
+					$sqlTrigger = "CREATE TRIGGER  `trigger" . date('Y-m-d H:i:s') . "` AFTER " . $action . " ON `" . $row['log01table'] . "`
+FOR EACH ROW
+BEGIN ";
+					foreach ($targeFields as $field) {
+
+						$sqlTrigger .= "IF( NEW." . $field['COLUMN_NAME'] . " ) THEN
+INSERT INTO log02log( `log02action` , `log02tablename` ,`log02field` , `log02before` , `log02after` ) VALUES ( 'insert', '" . $row['log01table'] . "', '" . $field['COLUMN_NAME'] . "', NEW." . $field['COLUMN_NAME'] . " );END IF ;";
+					}
+					$sqlTrigger .= "END;";
+					$this->Query($sqlTrigger);
+				}
+			}
+		} elseif (!isset($arr['create'])) {
+
+			$action = 'INSERT';
+			$qryCheck = "select trigger_name from information_schema.triggers where event_object_table='" . $row['log01table'] . "';";
+			$triggerList = $this->Query($qryCheck);
+
+			foreach ($triggerList as $trigger) {
+				$triggerName = $trigger['trigger_name'];
+				$sqlTriggerType = "select TRIGGER_NAME from information_schema.triggers where event_object_table='" . $row['log01table'] . "' and event_manipulation in('" . $action . "');";
+				$triggerType = $this->Query($sqlTriggerType);
+
+				if ($triggerType) {
+
+					$sqlDropTrigger = "Drop trigger `" . $triggerName . "`";
+
+					$result = $this->Query($sqlDropTrigger);
+				}
+			}
+			$arr['create'] = '0';
 		}
-		$sqlTrigger .= "END;";
-//		$sqlTrigger = "DELIMITER $$ CREATE TRIGGER `trig_update_test_add` AFTER UPDATE on `" . $row['log01table'] . "`FOR EACH ROW BEGIN ";
-//		$sqlTrigger = " DELIMITER $$ CREATE TRIGGER `trig_update_test_add` AFTER UPDATE on `" . $row['log01table'] . "`
-//FOR EACH ROW
-//BEGIN
-//	DECLARE before_column_values varchar(255) DEFAULT '';
-//    DECLARE after_column_values varchar(255) DEFAULT '';";
-//		foreach ($targeFields as $field) {
-//			$sqlTrigger.=" IF (NEW." . $field['COLUMN_NAME'] . " != OLD." . $field['COLUMN_NAME'] . ") THEN
-//before_column_values = concat(before_column_values, '" . $field['COLUMN_NAME'] . "', '=', OLD." . $field['COLUMN_NAME'] . ", '|');
-//after_column_values = concat(after_column_values, '" . $field['COLUMN_NAME'] . "', '=', NEW." . $field['COLUMN_NAME'] . ", '|');
-//";
-//			$sqlTrigger.="INSERT INTO log02log(log02tablename, log02action, log02before, log02after) VALUES ('xxx', 'yyy', before_column_values, after_column_values); END IF;";
-//		}
-//
-//		$sqlTrigger.="INSERT INTO log02log(log02tablename, log02action, log02before, log02after)
-//VALUES
-//('xxx', 'yyy', before_column_values, after_column_values);
-//END $$";
+
+		if ($arr['update']) {
+			$action = 'UPDATE';
+
+			$qryCheck = "select trigger_name from information_schema.triggers where event_object_table='" . $row['log01table'] . "';";
+			$triggerList = $this->Query($qryCheck);
+			if (!$triggerList) {
+				$sqlTrigger = "CREATE TRIGGER  `trigger" . date('Y-m-d H:i:s') . "` AFTER " . $action . " ON `" . $row['log01table'] . "`
+FOR EACH ROW
+BEGIN ";
+				foreach ($targeFields as $field) {
+
+					$sqlTrigger .= "IF( NEW." . $field['COLUMN_NAME'] . " ) THEN
+INSERT INTO log02log( `log02action` , `log02tablename` ,`log02field` , `log02before` , `log02after` ) VALUES ( 'insert', '" . $row['log01table'] . "', '" . $field['COLUMN_NAME'] . "', NEW." . $field['COLUMN_NAME'] . " );END IF ;";
+				}
+				$sqlTrigger .= "END;";
+				$this->Query($sqlTrigger);
+			}
+			foreach ($triggerList as $trigger) {
+				$triggerName = $trigger['trigger_name'];
+				$sqlTriggerType = "select TRIGGER_NAME from information_schema.triggers where event_object_table='" . $row['log01table'] . "' and event_manipulation in('" . $action . "');";
+				$triggerType = $this->Query($sqlTriggerType);
+				var_dump('inserting update trigger', $triggerType);
+				if (!$triggerType) {
+					$qryFields = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" . DB_NAME . "' AND TABLE_NAME = '" . $row['log01table'] . "'";
+
+					$targeFields = $this->Query($qryFields);
+					$arr['updatedBy'] = $user['us01uin'];
+					$arr['updatedOn'] = date('Y-m-d H:i:s');
+					$sqlTrigger = "CREATE TRIGGER  `trigger" . date('Y-m-d H:i:s') . "` AFTER " . $action . " ON `" . $row['log01table'] . "`
+FOR EACH ROW
+BEGIN ";
+					foreach ($targeFields as $field) {
+
+						$sqlTrigger .= "IF( NEW." . $field['COLUMN_NAME'] . " ) THEN
+INSERT INTO log02log( `log02action` , `log02tablename` ,`log02field` , `log02before` , `log02after` ) VALUES ( 'insert', '" . $row['log01table'] . "', '" . $field['COLUMN_NAME'] . "', NEW." . $field['COLUMN_NAME'] . " );END IF ;";
+					}
+					$sqlTrigger .= "END;";
+					$this->Query($sqlTrigger);
+				}
+			}
+		} elseif (!isset($arr['udpate'])) {
+
+			$action = 'UPDATE';
+			$qryCheck = "select trigger_name from information_schema.triggers where event_object_table='" . $row['log01table'] . "';";
+			$triggerList = $this->Query($qryCheck);
+			//var_dump('here', $triggerList, $arr);
+			foreach ($triggerList as $trigger) {
+				$triggerName = $trigger['trigger_name'];
+				$sqlTriggerType = "select TRIGGER_NAME from information_schema.triggers where event_object_table='" . $row['log01table'] . "' and event_manipulation in('" . $action . "');";
+				$triggerType = $this->Query($sqlTriggerType);
+
+				if ($triggerType) {
+
+					$sqlDropTrigger = "Drop trigger `" . $triggerName . "`";
+
+					$result = $this->Query($sqlDropTrigger);
+				}
+			}
+			$arr['update'] = '0';
+		}
 
 
 
 
-		$this->Query($sqlTrigger);
-		//var_dump($sqlTrigger);
-		//die();
-//database independent cases
 		return parent::update($id, $arr);
-//$this->update_core($id);
 	}
 
 	public function validate($type)

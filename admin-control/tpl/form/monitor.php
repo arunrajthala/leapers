@@ -14,11 +14,11 @@
 			</td>
 			<td>
 
-				<label ><input type="checkbox" <?php if ($_data[$prefix . 'create']) echo 'checked'; ?>  name="<?php echo 'create'; ?>"> Create </label><br />
+				<label ><input type="checkbox" <?php if ($_data[$prefix . 'create']) echo 'checked'; ?>  name="<?php echo 'create'; ?>"> Insert </label><br />
 				<label ><input type="checkbox" <?php if ($_data[$prefix . 'update']) echo 'checked'; ?>  name="<?php echo 'update'; ?>"> Update</label><br />
-				<label ><input type="checkbox" <?php if ($_data[$prefix . 'alter']) echo 'checked'; ?>  name="<?php echo 'alter'; ?>"> Alter </label><br />
+
 				<label ><input type="checkbox" <?php if ($_data[$prefix . 'delete']) echo 'checked'; ?>  name="<?php echo 'delete'; ?>"> Delete </label><br />
-				<label ><input type="checkbox" <?php if ($_data[$prefix . 'truncate']) echo 'checked'; ?>  name="<?php echo 'truncate'; ?>"> Truncate</label>
+
 
 			</td>
 		</tr>
