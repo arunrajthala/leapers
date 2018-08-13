@@ -1,0 +1,158 @@
+ //make:controller TodoController --resource
+ //make:model Todo
+ //artisan make:migration create_todo_table --create=todos
+ //composer require "laravelcollective/html":"^5.4.0"
+ 
+ 
+view/index
+@extends('layouts.app')
+
+@section('content')
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">Dashboard</div>
+
+                    <div class="card-body">
+                        <table class="table">
+
+                            <tr>
+                                <td>ID</td>
+                                <td>Note date</td>
+                                <td>Note due date</td>
+                                <td>Note</td>
+                            </tr>
+                            @foreach($todo as $data)
+                                <tr>
+                                    <td>{{$data->id}}</td>
+                                    <td>{{$data->note_date}}</td>
+                                    <td>{{$data->due_date}}</td>
+                                    <td>{{$data->note}}</td>
+                                </tr>
+                            @endforeach
+
+                        </table>
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+view/create
+@extends('layouts.app')
+
+@section('content')
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">Dashboard</div>
+
+                    <div class="card-body">
+                        {{ Form::model($todo, array('route' => array('todo.store')))}}
+                        <div class="form-group row">
+                            <label for="note_date" class="col-md-4 col-form-label text-md-right">{{ __('Note date') }}</label>
+
+                            <div class="col-md-6">
+                                <input id="note_date" type="text" class="form-control{{ $errors->has('note_date') ? ' is-invalid' : '' }}" name="note_date" value="{{ old('note_date') }}" required autofocus>
+
+                                @if ($errors->has('note_date'))
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $errors->first('note_date') }}</strong>
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="due_date" class="col-md-4 col-form-label text-md-right">{{ __('Due date') }}</label>
+
+                            <div class="col-md-6">
+                                <input id="due_date" type="text" class="form-control{{ $errors->has('due_date') ? ' is-invalid' : '' }}" name="due_date" value="{{ old('due_date') }}" required autofocus>
+
+                                @if ($errors->has('due_date'))
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $errors->first('due_date') }}</strong>
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="note" class="col-md-4 col-form-label text-md-right">{{ __('Note') }}</label>
+
+                            <div class="col-md-6">
+                                <input id="note" type="text" class="form-control{{ $errors->has('note') ? ' is-invalid' : '' }}" name="note" value="{{ old('note') }}" required autofocus>
+
+                                @if ($errors->has('note'))
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $errors->first('note') }}</strong>
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="form-group row mb-0">
+                            <div class="col-md-6 offset-md-4">
+                                <button type="submit" class="btn btn-primary">
+                                    {{ __('Create') }}
+                                </button>
+                            </div>
+                        </div>
+                        {{ Form::close() }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+controll
+/**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $todo = Todo::all();
+        return view('todo.index')->with('todo', $todo);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        $todo= new User();
+
+        return view('todo.create')->with('todo', $todo);
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $input = $request->all();
+        $input['user_id']=1;
+        $input['status']=1;
+        $note = Todo::create($input);
+        if ($note->id) {
+            return redirect('todo/')->with('success','Congratulations');
+            //return response()->json(['success' => __('Todo created.')]);
+        } else {
+            $error = ['errors' => ['message' => __('Failed to create note')]];
+            return redirect()->back()->with('error',$error['errors']['message']);
+        }
+    }
+    
+   
